@@ -1,4 +1,25 @@
+# Original repository patterns
 .codegraph/
 .omo/
 *.jar
 *.py[c|o]
+
+# Node / TypeScript build & dependencies
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Persistent local data
+data/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE & OS temporary files
+.gemini/
+.DS_Store
+Thumbs.db

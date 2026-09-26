@@ -1,0 +1,61 @@
+services:
+  caddy:
+    image: caddy:alpine
+    container_name: caddy-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - web-network
+    depends_on:
+      - pastebin
+
+  pastebin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pastebin-service
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      REDIS_HOST: "redis-db"
+      REDIS_PORT: "6379"
+    ports:
+      - "8080:8080"
+    networks:
+      - web-network
+      - db-network
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-db
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    networks:
+      - db-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+networks:
+  web-network:
+    driver: bridge
+  db-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  caddy-data:
+  caddy-config:
